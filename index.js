@@ -6,6 +6,7 @@ const h = window.innerHeight;
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 1000);
 camera.position.z = 5;
+
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(w, h);
 document.body.appendChild(renderer.domElement);
@@ -25,14 +26,16 @@ scene.add(hemilight);
 
 const dummy = new THREE.Object3D();
 const markerPositions = [];
+const markerNames = []; // To store strArea values
 
-// Create markers InstancedMesh
-const markerGeometry = new THREE.SphereGeometry(0.05, 16, 16);
-const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-const markers = new THREE.InstancedMesh(markerGeometry, markerMaterial, 100); // Adjust max count as needed
+const markerGeometry = new THREE.SphereGeometry(0.1, 32, 32);
+const markerMaterial = new THREE.MeshBasicMaterial({
+  color: 0xffffff,
+  wireframe: true,
+});
+const markers = new THREE.InstancedMesh(markerGeometry, markerMaterial, 100);
 scene.add(markers);
 
-// Load JSON and create markers
 fetch("./data/areas.json")
   .then((response) => {
     if (!response.ok) {
@@ -41,85 +44,71 @@ fetch("./data/areas.json")
     return response.json();
   })
   .then((data) => {
-    const areas = data.areas; // Access the areas array
+    const areas = data.areas;
     if (!Array.isArray(areas)) {
       throw new Error("Areas property is not an array.");
     }
 
     areas.forEach((area, i) => {
-      // Parse the position as numbers
       const x = parseFloat(area.X);
       const y = parseFloat(area.Y);
       const z = parseFloat(area.Z);
 
-      // Set marker position
-      dummy.position
-        .set(x, y, z)
-        .normalize()
-        .multiplyScalar(1.05);
+      dummy.position.set(x, y, z).normalize().multiplyScalar(1.05);
       dummy.updateMatrix();
       markers.setMatrixAt(i, dummy.matrix);
 
-      // Save marker position
       markerPositions.push(dummy.position.clone());
+      markerNames.push(area.strArea); // Save strArea
     });
 
-    // Mark instance matrix as needing an update
     markers.instanceMatrix.needsUpdate = true;
-    console.log("Markers added:", markerPositions);
+    markerGeometry.computeBoundingBox();
+    markerGeometry.computeBoundingSphere();
+    markers.updateMatrixWorld(true);
   })
   .catch((error) => console.error("Error loading JSON:", error));
 
+const sidebar = document.createElement("div");
+sidebar.style.position = "fixed";
+sidebar.style.right = "0";
+sidebar.style.top = "0";
+sidebar.style.width = "300px";
+sidebar.style.height = "100%";
+sidebar.style.background = "rgba(0, 0, 0, 0.8)";
+sidebar.style.color = "white";
+sidebar.style.padding = "20px";
+sidebar.style.display = "none";
+sidebar.style.overflow = "auto";
+sidebar.innerHTML = "<h2>Marker Details</h2><div id='marker-details'></div>";
+document.body.appendChild(sidebar);
 
+const mouse = new THREE.Vector2();
 const raycaster = new THREE.Raycaster();
-const pointer = new THREE.Vector2();
 
-const popup = document.createElement("div");
-popup.style.position = "absolute";
-popup.style.background = "rgba(0, 0, 0, 0.7)";
-popup.style.color = "white";
-popup.style.padding = "10px";
-popup.style.borderRadius = "5px";
-popup.style.display = "none";
-popup.style.width = "200px";
-popup.innerHTML = `
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <span id="popup-content"></span>
-        <button id="close-popup" style="background: none; border: none; color: white; cursor: pointer;">X</button>
-    </div>
-`;
+raycaster.params.Points = { threshold: 1 };
 
-document.body.appendChild(popup);
+ window.addEventListener("pointerdown", (event) => {
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-const closeButton = popup.querySelector("#close-popup");
-closeButton.addEventListener("click", () => {
-  popup.style.display = "none";
-});
+  raycaster.setFromCamera(mouse, camera);
 
-window.addEventListener("pointerdown", (event) => {
-  pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-  pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  const intersection = raycaster.intersectObject( markers );
 
-  raycaster.setFromCamera(pointer, camera);
-  const intersects = raycaster.intersectObject(markers);
-
-  if (intersects.length > 0) {
-    const instanceId = intersects[0].instanceId;
-    if (instanceId !== undefined) {
-      const position = markerPositions[instanceId];
-      const content = popup.querySelector("#popup-content");
-      content.innerHTML = `
-                <strong>Marker Position:</strong><br>
-                X: ${position.x.toFixed(2)}<br>
-                Y: ${position.y.toFixed(2)}<br>
-                Z: ${position.z.toFixed(2)}
-            `;
-      popup.style.display = "block";
-      popup.style.left = `${event.clientX}px`;
-      popup.style.top = `${event.clientY - 50}px`;
-    }
+  if (intersection.length > 0) {
+    const iid = intersection[0].instanceId;
+    const areaName = markerNames[iid];
+    const position = markerPositions[iid];
+    sidebar.innerHTML = `Area: <b>${areaName}</b><br>ID: <b>${iid}</b><br>Position: <b>${position
+      .toArray()
+      .join(", ")}</b>`;
+    sidebar.style.display = "block";
+  } else {
+    console.log("No intersection detected");
   }
-});
+}); 
+ 
 
 function animate() {
   requestAnimationFrame(animate);
@@ -133,4 +122,7 @@ function handleWindowResize() {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
-window.addEventListener("resize", handleWindowResize, false);
+
+window.addEventListener("resize", handleWindowResize);
+
+console.log(markerGeometry);

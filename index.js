@@ -134,6 +134,7 @@ window.addEventListener("pointerdown", async (event) => {
         const instructions = recipe.strInstructions.replace(/\r\n/g, "<br>");
         const name = recipe.strMeal;
         const ingredients = [];
+        const flag = `/images/${country}.png`;
 
         for (let i = 1; i <= 20; i++) {
           const ingredient = recipe[`strIngredient${i}`];
@@ -145,9 +146,14 @@ window.addEventListener("pointerdown", async (event) => {
         }
 
         document.getElementById("details").innerHTML = `
-          <h2>${country.charAt(0).toUpperCase() + country.slice(1)} recipe</h2>
+          <div class="heading">
+          <img src="${flag}" alt="${country}" class="flagImage">
+            <h2>${
+              country.charAt(0).toUpperCase() + country.slice(1)
+            } recipe</h2>
+          </div>
           <h3>${name}</h3>
-          <ul>
+          <ul class="ingredients">
             ${ingredients.join("")}
           </ul>
           ${instructions}
@@ -169,6 +175,8 @@ const closebutton = document.getElementById("close-btn");
 closebutton.addEventListener("click", () => {
   if ((sidebar.style.display = "block")) {
     sidebar.style.display = "none";
+
+    document.getElementById("details").innerHTML = "";
   }
 });
 // </INTERACTION>

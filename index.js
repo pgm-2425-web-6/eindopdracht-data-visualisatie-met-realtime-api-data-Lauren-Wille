@@ -84,7 +84,7 @@ const mouse = new THREE.Vector2();
 const sidebar = document.createElement("div");
 sidebar.className = "sidebar";
 sidebar.innerHTML =
-  "<div class='buttons'> <button class='print-btn' id='print-btn'><img src='/images/print.svg' alt='print'></button><button class='close-btn' id='close-btn'>X</button></div> <div class='details' id='details'></div>";
+  "<div class='buttons'> <button class='print-btn' id='print-btn'><img src='images/print.svg' alt='print'></button><button class='close-btn' id='close-btn'>X</button></div> <div class='details' id='details'></div>";
 document.body.appendChild(sidebar);
 
 window.addEventListener("pointerdown", async (event) => {
@@ -135,7 +135,7 @@ window.addEventListener("pointerdown", async (event) => {
         const instructions = recipe.strInstructions.replace(/\r\n/g, "<br>");
         const name = recipe.strMeal;
         const ingredients = [];
-        const flag = `/images/${country}.png`;
+        const flag = `images/${country}.png`;
 
         for (let i = 1; i <= 20; i++) {
           const ingredient = recipe[`strIngredient${i}`];

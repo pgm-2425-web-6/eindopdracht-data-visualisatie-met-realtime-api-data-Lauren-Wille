@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "jsm/controls/OrbitControls.js";
 
+// <EARTH>
 const w = window.innerWidth;
 const h = window.innerHeight;
 const scene = new THREE.Scene();
@@ -23,16 +24,18 @@ scene.add(earthMesh);
 
 const hemilight = new THREE.HemisphereLight(0xffffff, 0x444444);
 scene.add(hemilight);
+// </EARTH>
 
-const dummy = new THREE.Object3D();
+// <MARKERS>
 const markerPositions = [];
-const markerNames = []; // To store strArea values
+const markerNames = [];
 
-const markerGeometry = new THREE.SphereGeometry(0.1, 32, 32);
+const markerGeometry = new THREE.SphereGeometry(0.01, 12, 12);
 const markerMaterial = new THREE.MeshBasicMaterial({
   color: 0xffffff,
   wireframe: true,
 });
+
 const markers = new THREE.InstancedMesh(markerGeometry, markerMaterial, 100);
 scene.add(markers);
 
@@ -49,66 +52,59 @@ fetch("./data/areas.json")
       throw new Error("Areas property is not an array.");
     }
 
-    areas.forEach((area, i) => {
+    areas.forEach((area) => {
       const x = parseFloat(area.X);
       const y = parseFloat(area.Y);
       const z = parseFloat(area.Z);
 
-      dummy.position.set(x, y, z).normalize().multiplyScalar(1.05);
-      dummy.updateMatrix();
-      markers.setMatrixAt(i, dummy.matrix);
+      const marker = new THREE.Mesh(
+        new THREE.SphereGeometry(0.02, 12, 12),
+        new THREE.MeshBasicMaterial({
+          color: 0xffffff,
+          wireframe: true,
+        })
+      );
 
-      markerPositions.push(dummy.position.clone());
-      markerNames.push(area.strArea); // Save strArea
+      marker.position.set(x, y, z).normalize().multiplyScalar(1.05);
+      marker.userData.name = area.strArea;
+      scene.add(marker);
+
+      markerPositions.push(marker.position.clone());
+      markerNames.push(area.strArea);
     });
-
-    markers.instanceMatrix.needsUpdate = true;
-    markerGeometry.computeBoundingBox();
-    markerGeometry.computeBoundingSphere();
-    markers.updateMatrixWorld(true);
   })
   .catch((error) => console.error("Error loading JSON:", error));
+// </MARKERS>
+
+// <INTERACTION>
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
 
 const sidebar = document.createElement("div");
-sidebar.style.position = "fixed";
-sidebar.style.right = "0";
-sidebar.style.top = "0";
-sidebar.style.width = "300px";
-sidebar.style.height = "100%";
-sidebar.style.background = "rgba(0, 0, 0, 0.8)";
-sidebar.style.color = "white";
-sidebar.style.padding = "20px";
-sidebar.style.display = "none";
-sidebar.style.overflow = "auto";
-sidebar.innerHTML = "<h2>Marker Details</h2><div id='marker-details'></div>";
+sidebar.className = "sidebar";
+sidebar.innerHTML =
+  "<h2>Recipe</h2><button class='close-btn' id='close-btn'>X</button><div class='details' id='details'></div>";
 document.body.appendChild(sidebar);
 
-const mouse = new THREE.Vector2();
-const raycaster = new THREE.Raycaster();
-
-raycaster.params.Points = { threshold: 1 };
-
- window.addEventListener("pointerdown", (event) => {
+window.addEventListener("pointerdown", (event) => {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
   raycaster.setFromCamera(mouse, camera);
 
-  const intersection = raycaster.intersectObject( markers );
+  const intersects = raycaster.intersectObjects(scene.children, true);
 
-  if (intersection.length > 0) {
-    const iid = intersection[0].instanceId;
-    const areaName = markerNames[iid];
-    const position = markerPositions[iid];
-    sidebar.innerHTML = `Area: <b>${areaName}</b><br>ID: <b>${iid}</b><br>Position: <b>${position
-      .toArray()
-      .join(", ")}</b>`;
-    sidebar.style.display = "block";
-  } else {
-    console.log("No intersection detected");
+  if (intersects.length > 0) {
+    const clickedObject = intersects[0].object;
+    if (clickedObject.userData.name) {
+      console.log("Clicked on marker:", clickedObject.userData.name);
+      document.getElementById(
+        "details"
+      ).innerHTML = `${clickedObject.userData.name} recipe`;
+    }
   }
-}); 
- 
+});
+// </INTERACTION>
 
 function animate() {
   requestAnimationFrame(animate);
@@ -124,5 +120,3 @@ function handleWindowResize() {
 }
 
 window.addEventListener("resize", handleWindowResize);
-
-console.log(markerGeometry);

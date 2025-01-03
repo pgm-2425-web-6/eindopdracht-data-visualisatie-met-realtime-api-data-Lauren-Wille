@@ -1,109 +1,109 @@
 {
   "areas": [
     {
-      "strArea": "American",
+      "strArea": "american",
       "X": "0.09",
       "Y": "0.5",
       "Z": "-0.71"
     },
     {
-      "strArea": "British",
+      "strArea": "british",
       "X": "-10",
       "Y": "14",
       "Z": "-0.7"
     },
     {
-      "strArea": "Canadian",
+      "strArea": "canadian",
       "X": "0.2",
       "Y": "0.8",
       "Z": "-0.71"
     },
     {
-      "strArea": "Chinese",
+      "strArea": "chinese",
       "X": "13",
       "Y": "25",
       "Z": "40"
     },
     {
-      "strArea": "Dutch",
+      "strArea": "dutch",
       "X": "-11",
       "Y": "15",
       "Z": "2"
     },
     {
-      "strArea": "Egyptian",
+      "strArea": "egyptian",
       "X": "-16",
       "Y": "9",
       "Z": "9"
     },
     {
-      "strArea": "Filipino",
+      "strArea": "filipino",
       "X": "40",
       "Y": "15",
       "Z": "60"
     },
     {
-      "strArea": "French",
+      "strArea": "french",
       "X": "-13",
       "Y": "14",
       "Z": "1"
     },
     {
-      "strArea": "Greek",
+      "strArea": "greek",
       "X": "-20",
       "Y": "17",
       "Z": "8"
     },
     {
-      "strArea": "Indian",
+      "strArea": "indian",
       "X": "-6",
       "Y": "15",
       "Z": "40"
     },
     {
-      "strArea": "Italian",
+      "strArea": "italian",
       "X": "-20",
       "Y": "18",
       "Z": "5"
     },
     {
-      "strArea": "Japanese",
+      "strArea": "japanese",
       "X": "30",
       "Y": "30",
       "Z": "30"
     },
     {
-      "strArea": "Mexican",
+      "strArea": "mexican",
       "X": "0.09",
       "Y": "0.25",
       "Z": "-0.71"
     },
     {
-      "strArea": "Moroccan",
+      "strArea": "moroccan",
       "X": "-15",
       "Y": "8",
       "Z": "-3"
     },
     {
-      "strArea": "Polish",
+      "strArea": "polish",
       "X": "-11",
       "Y": "13.5",
       "Z": "3"
     },
     {
-      "strArea": "Russian",
+      "strArea": "russian",
       "X": "-1",
       "Y": "5",
       "Z": "3"
     },
     {
-      "strArea": "Spanish",
+      "strArea": "spanish",
       "X": "-10",
       "Y": "14",
       "Z": "-0.7"
     },
     {
-      "strArea": "Turkish",
+      "strArea": "turkish",
       "X": "-12",
       "Y": "12",
       "Z": "9"

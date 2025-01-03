@@ -128,21 +128,34 @@ window.addEventListener("pointerdown", async (event) => {
 
         const mealData = await mealResponse.json();
         const recipe = mealData.meals[0];
-        //console.log(recipe);
 
         const country = clickedObject.country;
         const image = recipe.strMealThumb;
         const instructions = recipe.strInstructions.replace(/\r\n/g, "<br>");
         const name = recipe.strMeal;
+        const ingredients = [];
+
+        for (let i = 1; i <= 20; i++) {
+          const ingredient = recipe[`strIngredient${i}`];
+          const measure = recipe[`strMeasure${i}`];
+
+          if (ingredient && ingredient.trim() !== "") {
+            ingredients.push(`<li>${measure} ${ingredient}</li>`);
+          }
+        }
 
         document.getElementById("details").innerHTML = `
           <h2>${country.charAt(0).toUpperCase() + country.slice(1)} recipe</h2>
           <h3>${name}</h3>
+          <ul>
+            ${ingredients.join("")}
+          </ul>
           ${instructions}
-          <img src="${image}" alt="${name}" class="mealImage">
+          <div class="image-container">
+            <img src="${image}" alt="${name}" class="mealImage">
+          </div>
         `;
       } catch (error) {
-        console.error("Error fetching recipe data:", error);
         document.getElementById("details").innerHTML = `
           <h2>Error</h2>
           <p>Could not load recipe for ${clickedObject.country}.</p>

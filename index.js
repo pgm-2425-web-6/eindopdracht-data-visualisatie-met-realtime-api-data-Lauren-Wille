@@ -19,10 +19,11 @@ const geometry = new THREE.IcosahedronGeometry(1, 12);
 const material = new THREE.MeshPhongMaterial({
   map: loader.load("./textures/earth.jpg"),
 });
+
 const earthMesh = new THREE.Mesh(geometry, material);
 scene.add(earthMesh);
 
-const hemilight = new THREE.HemisphereLight(0xffffff, 0x444444);
+const hemilight = new THREE.HemisphereLight(0xffffff);
 scene.add(hemilight);
 // </EARTH>
 
@@ -146,20 +147,24 @@ window.addEventListener("pointerdown", async (event) => {
         }
 
         document.getElementById("details").innerHTML = `
+        <div class="content">
           <div class="heading">
-          <img src="${flag}" alt="${country}" class="flagImage">
+            <img src="${flag}" alt="${country}" class="flagImage">
             <h2>${
               country.charAt(0).toUpperCase() + country.slice(1)
             } recipe</h2>
           </div>
           <h3>${name}</h3>
-          <ul class="ingredients">
-            ${ingredients.join("")}
-          </ul>
-          ${instructions}
           <div class="image-container">
             <img src="${image}" alt="${name}" class="mealImage">
           </div>
+          <h4>Ingredients</h4>
+          <ul class="ingredients">
+          ${ingredients.join("")}
+          </ul>
+          <h4>Recipe</h4>
+          ${instructions}
+        </div>
         `;
       } catch (error) {
         document.getElementById("details").innerHTML = `

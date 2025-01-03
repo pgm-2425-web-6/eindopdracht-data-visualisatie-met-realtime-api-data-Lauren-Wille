@@ -84,7 +84,7 @@ const mouse = new THREE.Vector2();
 const sidebar = document.createElement("div");
 sidebar.className = "sidebar";
 sidebar.innerHTML =
-  "<button class='close-btn' id='close-btn'>X</button><div class='details' id='details'></div>";
+  "<div class='buttons'> <button class='print-btn' id='print-btn'><img src='/images/print.svg' alt='print'></button><button class='close-btn' id='close-btn'>X</button></div> <div class='details' id='details'></div>";
 document.body.appendChild(sidebar);
 
 window.addEventListener("pointerdown", async (event) => {
@@ -186,10 +186,11 @@ closebutton.addEventListener("click", () => {
 });
 // </INTERACTION>
 
+/* // </AUTO ROTATE>
 let clock = new THREE.Clock();
 
 let globalUniforms = {
-  time: { value: 0 }
+  time: { value: 0 },
 };
 
 let controls = new OrbitControls(camera, renderer.domElement);
@@ -206,6 +207,7 @@ renderer.setAnimationLoop(() => {
   controls.update();
   renderer.render(scene, camera);
 });
+// </AUTO ROTATE> */
 
 function animate() {
   requestAnimationFrame(animate);
@@ -221,3 +223,21 @@ function handleWindowResize() {
 }
 
 window.addEventListener("resize", handleWindowResize);
+
+// </PRINT>
+document.getElementById("print-btn").addEventListener("click", () => {
+  const originalContent = document.body.innerHTML;
+
+  document.body.innerHTML = sidebar.outerHTML;
+
+  sidebar.style.height = "auto";
+  sidebar.style.width = "auto";
+  sidebar.style.overflow = "visible";
+
+  window.print();
+
+  document.body.innerHTML = originalContent;
+
+  window.location.reload();
+});
+// </PRINT>

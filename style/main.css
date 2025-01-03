@@ -24,18 +24,33 @@ body {
     display: none;
     overflow: auto;
 
-    & .close-btn {
+    & .buttons {
+      display: flex;
+      flex-direction: row;
       position: absolute;
       top: 25px;
       right: 25px;
-      border: none;
-      background-color: transparent;
-      color: var(--dark);
-      font-family: "Asap Condensed", sans-serif;
-      font-weight: bold;
+      align-items: flex-start;
 
-      &:hover {
-        cursor: pointer;
+      & button {
+        border: none;
+        background-color: transparent;
+
+        &:hover {
+          cursor: pointer;
+        }
+      }
+
+      & .print-btn {
+        & img {
+          width: 1rem;
+        }
+      }
+
+      & .close-btn {
+        color: var(--dark);
+        font-family: "Asap Condensed", sans-serif;
+        font-weight: bold;
       }
     }
 
@@ -124,5 +139,26 @@ body {
     z-index: 10 !important;
     top: 0 !important;
     left: 0 !important;
+  }
+}
+
+@media print {
+  .sidebar {
+    display: block;
+    height: auto;
+    overflow: visible !important;
+    width: 100vw !important;
+    position: relative !important;
+    padding: 40px;
+  }
+
+  .sidebar .close-btn,
+  .sidebar #print-btn {
+    display: none; /* Hide buttons not needed for printing */
+  }
+
+  .sidebar .details {
+    page-break-inside: auto; /* Allow content to split across pages */
+    overflow: visible !important; /* Ensure all details are visible */
   }
 }

@@ -143,11 +143,12 @@ body {
 }
 
 @media print {
+
   .sidebar {
     display: block;
     height: auto;
     overflow: visible !important;
-    width: 100vw !important;
+    width: 95vw !important;
     position: relative !important;
     padding: 40px;
     z-index: 100 !important;
@@ -155,11 +156,11 @@ body {
 
   .sidebar .close-btn,
   .sidebar #print-btn {
-    display: none; /* Hide buttons not needed for printing */
+    display: none;
   }
 
   .sidebar .details {
-    page-break-inside: auto; /* Allow content to split across pages */
-    overflow: visible !important; /* Ensure all details are visible */
+    page-break-inside: auto;
+    overflow: visible !important;
   }
 }

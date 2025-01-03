@@ -61,7 +61,7 @@ fetch("./data/areas.json")
       const marker = new THREE.Mesh(
         new THREE.SphereGeometry(0.02, 12, 12),
         new THREE.MeshBasicMaterial({
-          color: 0xffffff,
+          color: 0x432723,
           wireframe: true,
         })
       );
@@ -117,7 +117,7 @@ window.addEventListener("pointerdown", async (event) => {
           );
         }
 
-        const mealId = areaData.meals[2].idMeal;
+        const mealId = areaData.meals[0].idMeal;
 
         const mealResponse = await fetch(
           `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${mealId}`
@@ -185,6 +185,27 @@ closebutton.addEventListener("click", () => {
   }
 });
 // </INTERACTION>
+
+let clock = new THREE.Clock();
+
+let globalUniforms = {
+  time: { value: 0 }
+};
+
+let controls = new OrbitControls(camera, renderer.domElement);
+controls.enablePan = false;
+controls.minDistance = 2;
+controls.maxDistance = 5;
+controls.enableDamping = true;
+controls.autoRotate = true;
+controls.autoRotateSpeed *= 0.25;
+
+renderer.setAnimationLoop(() => {
+  let t = clock.getElapsedTime();
+  globalUniforms.time.value = t;
+  controls.update();
+  renderer.render(scene, camera);
+});
 
 function animate() {
   requestAnimationFrame(animate);

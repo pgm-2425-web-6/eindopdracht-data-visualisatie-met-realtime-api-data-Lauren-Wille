@@ -12,11 +12,24 @@ body {
     color: black;
     padding: 20px;
     display: none;
+    overflow: auto;
 
     & .close-btn {
       position: absolute;
       top: 10px;
       right: 10px;
+    }
+
+    & .details {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        
+      & .mealImage {
+        width: 90%;
+        border-radius: 8px;
+      }
     }
   }
 }

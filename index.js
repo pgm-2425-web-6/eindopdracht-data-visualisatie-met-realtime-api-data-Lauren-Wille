@@ -66,7 +66,7 @@ fetch("./data/areas.json")
       );
 
       marker.position.set(x, y, z).normalize().multiplyScalar(1.05);
-      marker.userData.name = area.strArea;
+      marker.country = area.strArea;
       scene.add(marker);
 
       markerPositions.push(marker.position.clone());
@@ -83,10 +83,10 @@ const mouse = new THREE.Vector2();
 const sidebar = document.createElement("div");
 sidebar.className = "sidebar";
 sidebar.innerHTML =
-  "<h2>Recipe</h2><button class='close-btn' id='close-btn'>X</button><div class='details' id='details'></div>";
+  "<button class='close-btn' id='close-btn'>X</button><div class='details' id='details'></div>";
 document.body.appendChild(sidebar);
 
-window.addEventListener("pointerdown", (event) => {
+window.addEventListener("pointerdown", async (event) => {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
@@ -96,12 +96,66 @@ window.addEventListener("pointerdown", (event) => {
 
   if (intersects.length > 0) {
     const clickedObject = intersects[0].object;
-    if (clickedObject.userData.name) {
-      console.log("Clicked on marker:", clickedObject.userData.name);
-      document.getElementById(
-        "details"
-      ).innerHTML = `${clickedObject.userData.name} recipe`;
+
+    if (clickedObject.country) {
+      sidebar.style.display = "block";
+
+      try {
+        const areaResponse = await fetch(
+          `https://www.themealdb.com/api/json/v1/1/filter.php?a=${clickedObject.country}`
+        );
+
+        if (!areaResponse.ok) {
+          throw new Error(`HTTP error! status: ${areaResponse.status}`);
+        }
+
+        const areaData = await areaResponse.json();
+        if (!areaData.meals || areaData.meals.length === 0) {
+          throw new Error(
+            `No meals found for country: ${clickedObject.country}`
+          );
+        }
+
+        const mealId = areaData.meals[2].idMeal;
+
+        const mealResponse = await fetch(
+          `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${mealId}`
+        );
+
+        if (!mealResponse.ok) {
+          throw new Error(`HTTP error! status: ${mealResponse.status}`);
+        }
+
+        const mealData = await mealResponse.json();
+        const recipe = mealData.meals[0];
+        //console.log(recipe);
+
+        const country = clickedObject.country;
+        const image = recipe.strMealThumb;
+        const instructions = recipe.strInstructions.replace(/\r\n/g, "<br>");
+        const name = recipe.strMeal;
+
+        document.getElementById("details").innerHTML = `
+          <h2>${country.charAt(0).toUpperCase() + country.slice(1)} recipe</h2>
+          <h3>${name}</h3>
+          ${instructions}
+          <img src="${image}" alt="${name}" class="mealImage">
+        `;
+      } catch (error) {
+        console.error("Error fetching recipe data:", error);
+        document.getElementById("details").innerHTML = `
+          <h2>Error</h2>
+          <p>Could not load recipe for ${clickedObject.country}.</p>
+        `;
+      }
     }
+  }
+});
+
+const closebutton = document.getElementById("close-btn");
+closebutton.addEventListener("click", () => {
+  if ((sidebar.style.display = "block")) {
+    sidebar.style.display = "none";
   }
 });
 // </INTERACTION>

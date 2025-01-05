@@ -142,8 +142,7 @@ body {
   }
 }
 
-@media print {
-
+@media print and (min-width: 768px){
   .sidebar {
     display: block;
     height: auto;

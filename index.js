@@ -28,17 +28,12 @@ scene.add(hemilight);
 // </EARTH>
 
 // <MARKERS>
+import { GLTFLoader } from 'GLTFLoader';
+
+const glftLoader = new GLTFLoader();
 const markerPositions = [];
 const markerNames = [];
-
-const markerGeometry = new THREE.SphereGeometry(0.01, 12, 12);
-const markerMaterial = new THREE.MeshBasicMaterial({
-  color: 0xffffff,
-  wireframe: true,
-});
-
-const markers = new THREE.InstancedMesh(markerGeometry, markerMaterial, 100);
-scene.add(markers);
+const markersMap = new Map();
 
 fetch("./data/areas.json")
   .then((response) => {
@@ -53,26 +48,30 @@ fetch("./data/areas.json")
       throw new Error("Areas property is not an array.");
     }
 
-    areas.forEach((area) => {
-      const x = parseFloat(area.X);
-      const y = parseFloat(area.Y);
-      const z = parseFloat(area.Z);
+    glftLoader.load("./assets/fork.gltf", (gltf) => {
+      const markerTemplate = gltf.scene;
+    
+      markerTemplate.scale.set(0.015, 0.015, 0.015); 
+    
+      markerTemplate.rotation.set(-Math.PI/1.5, Math.PI, Math.PI/5);
+      
+      areas.forEach((area) => {
+        const x = parseFloat(area.X);
+        const y = parseFloat(area.Y);
+        const z = parseFloat(area.Z);
+    
+        const marker = markerTemplate.clone(); 
+        marker.position.set(x, y, z).normalize().multiplyScalar(1.10); 
+        marker.country = area.strArea; 
+        scene.add(marker);
+    
+        markersMap.set(marker, area.strArea)
 
-      const marker = new THREE.Mesh(
-        new THREE.SphereGeometry(0.02, 12, 12),
-        new THREE.MeshBasicMaterial({
-          color: 0x432723,
-          wireframe: true,
-        })
-      );
+        //console.log("Added marker:", marker, "Country:", marker.country);
 
-      marker.position.set(x, y, z).normalize().multiplyScalar(1.05);
-      marker.country = area.strArea;
-      scene.add(marker);
-
-      markerPositions.push(marker.position.clone());
-      markerNames.push(area.strArea);
+      });
     });
+    
   })
   .catch((error) => console.error("Error loading JSON:", error));
 // </MARKERS>
@@ -87,7 +86,7 @@ sidebar.innerHTML =
   "<div class='buttons'> <button class='print-btn' id='print-btn'><img src='images/print.svg' alt='print'></button><button class='close-btn' id='close-btn'>X</button></div> <div class='details' id='details'></div>";
 document.body.appendChild(sidebar);
 
-window.addEventListener("pointerdown", async (event) => {
+async function onDocumentMouseDown(event) {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
@@ -96,9 +95,15 @@ window.addEventListener("pointerdown", async (event) => {
   const intersects = raycaster.intersectObjects(scene.children, true);
 
   if (intersects.length > 0) {
-    const clickedObject = intersects[0].object;
+    let clickedObject = intersects[0].object;
 
-    if (clickedObject.country) {
+    while (clickedObject && !clickedObject.country) {
+      clickedObject = clickedObject.parent;
+    }
+
+    const country = clickedObject ? clickedObject.country : null;
+
+    if (country) {
       sidebar.style.display = "block";
 
       try {
@@ -130,7 +135,6 @@ window.addEventListener("pointerdown", async (event) => {
         const mealData = await mealResponse.json();
         const recipe = mealData.meals[0];
 
-        const country = clickedObject.country;
         const image = recipe.strMealThumb;
         const instructions = recipe.strInstructions.replace(/\r\n/g, "<br>");
         const name = recipe.strMeal;
@@ -174,7 +178,9 @@ window.addEventListener("pointerdown", async (event) => {
       }
     }
   }
-});
+};
+
+document.addEventListener("mousedown", onDocumentMouseDown);
 
 const closebutton = document.getElementById("close-btn");
 closebutton.addEventListener("click", () => {
@@ -184,9 +190,10 @@ closebutton.addEventListener("click", () => {
     document.getElementById("details").innerHTML = "";
   }
 });
+
 // </INTERACTION>
 
-/* // </AUTO ROTATE>
+/*  // </AUTO ROTATE>
 let clock = new THREE.Clock();
 
 let globalUniforms = {
@@ -207,7 +214,8 @@ renderer.setAnimationLoop(() => {
   controls.update();
   renderer.render(scene, camera);
 });
-// </AUTO ROTATE> */
+// </AUTO ROTATE>
+ */
 
 function animate() {
   requestAnimationFrame(animate);

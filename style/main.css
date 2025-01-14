@@ -72,10 +72,6 @@ body {
 
       & h2 {
         font-size: 2rem;
-      }
-
-      & h3 {
-        font-size: 1.5rem;
         margin-bottom: 20px;
         font-family: "Annie Use Your Telescope", handwriting;
       }
@@ -197,9 +193,22 @@ body {
   top: 10px;
   left: 10px;
   z-index: 1000; /* Ensure it stays in front of the canvas */
-  background-color: rgba(0, 0, 0, 0.7); /* Optional: makes the info text background a little transparent */
   color: white; /* Text color */
   padding: 10px;
   border-radius: 5px;
   font-size: 16px;
+  height: 100%;
+}
+
+.audio-icon
+{
+  & img 
+  {
+    width: 1.8rem;
+  }
+
+  &:hover 
+   {
+    cursor: pointer;
+   }
 }

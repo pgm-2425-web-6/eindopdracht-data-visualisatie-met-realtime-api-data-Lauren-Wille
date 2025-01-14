@@ -170,15 +170,16 @@ async function onDocumentMouseDown(event) {
           }
         }
 
+
         document.getElementById("details").innerHTML = `
         <div class="content">
           <div class="heading">
+           <a class="audio-icon" id="audio-icon">
+              <img src="./images/audio.png" alt="Play Audio">
+          </a>
             <img src="${flag}" alt="${country}" class="flagImage">
-            <h2>${
-              country.charAt(0).toUpperCase() + country.slice(1)
-            } recipe</h2>
+            <h2>${name}</h2>
           </div>
-          <h3>${name}</h3>
           <div class="image-container">
             <img src="${image}" alt="${name}" class="mealImage">
           </div>
@@ -190,6 +191,12 @@ async function onDocumentMouseDown(event) {
           ${instructions}
         </div>
         `;
+
+        const audioIcon = document.getElementById("audio-icon");
+        if (audioIcon) {
+          audioIcon.addEventListener("click", () => audioFunction(country));
+        }
+
       } catch (error) {
         document.getElementById("details").innerHTML = `
           <h2>Error</h2>
@@ -432,3 +439,19 @@ const styleSheet = document.createElement("style");
 styleSheet.type = "text/css";
 styleSheet.innerText = styles;
 document.head.appendChild(styleSheet);
+
+function audioFunction(country) {
+  // Dynamically construct the audio file path
+  const audioPath = `./audio/${country}.mp3`;
+
+  const audio = new Audio(audioPath);
+
+  audio
+    .play()
+    .then(() => {
+      console.log(`Playing audio for ${country}`);
+    })
+    .catch((error) => {
+      console.error(`Failed to play audio for ${country}:`, error);
+    });
+}

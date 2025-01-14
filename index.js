@@ -10,7 +10,9 @@ camera.position.z = 5;
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(w, h);
-document.body.appendChild(renderer.domElement);
+
+const container = document.getElementById('threejs-container'); // Get the div by ID
+container.appendChild(renderer.domElement); // Append the renderer to the div
 
 new OrbitControls(camera, renderer.domElement);
 
@@ -31,8 +33,6 @@ scene.add(hemilight);
 import { GLTFLoader } from 'GLTFLoader';
 
 const glftLoader = new GLTFLoader();
-const markerPositions = [];
-const markerNames = [];
 const markersMap = new Map();
 
 fetch("./data/areas.json")
@@ -51,26 +51,46 @@ fetch("./data/areas.json")
     glftLoader.load("./assets/fork.gltf", (gltf) => {
       const markerTemplate = gltf.scene;
     
-      markerTemplate.scale.set(0.015, 0.015, 0.015); 
+      markerTemplate.scale.set(0.015, 0.015, 0.015);
     
-      markerTemplate.rotation.set(-Math.PI/1.5, Math.PI, Math.PI/5);
-      
       areas.forEach((area) => {
         const x = parseFloat(area.X);
         const y = parseFloat(area.Y);
         const z = parseFloat(area.Z);
     
-        const marker = markerTemplate.clone(); 
-        marker.position.set(x, y, z).normalize().multiplyScalar(1.10); 
-        marker.country = area.strArea; 
+        const marker = markerTemplate.clone();
+    
+        const position = new THREE.Vector3(x, y, z).normalize().multiplyScalar(1.10);
+    
+        if (!marker.position) {
+          marker.traverse((child) => {
+            if (child.isMesh) {
+              child.position.copy(position);
+            }
+          });
+        } else {
+          marker.position.copy(position);
+        }
+    
+        const normal = position.clone().normalize();
+
+        const quaternion = new THREE.Quaternion();
+        quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
+
+        const correctionQuaternion = new THREE.Quaternion();
+        correctionQuaternion.setFromEuler(new THREE.Euler(Math.PI/1.2, 0, 0)); 
+        quaternion.multiply(correctionQuaternion);
+
+        marker.quaternion.copy(quaternion);
+    
+        marker.country = area.strArea;
+    
         scene.add(marker);
     
-        markersMap.set(marker, area.strArea)
-
-        //console.log("Added marker:", marker, "Country:", marker.country);
-
+        markersMap.set(marker, area.strArea);
       });
     });
+    
     
   })
   .catch((error) => console.error("Error loading JSON:", error));
@@ -191,9 +211,42 @@ closebutton.addEventListener("click", () => {
   }
 });
 
+document.addEventListener("mousemove", (event) => {
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+
+  const intersects = raycaster.intersectObjects(scene.children, true);
+
+  let hoveringFork = false;
+
+  // Check if the mouse is hovering over a fork marker
+  for (let i = 0; i < intersects.length; i++) {
+    let intersectedObject = intersects[i].object;
+
+    // Traverse up the object hierarchy to find the marker
+    while (intersectedObject && !intersectedObject.country) {
+      intersectedObject = intersectedObject.parent;
+    }
+
+    if (intersectedObject && intersectedObject.country) {
+      hoveringFork = true;
+      break;
+    }
+  }
+
+  // Change the cursor based on hover state
+  if (hoveringFork) {
+    document.body.style.cursor = "pointer";  // Cursor when hovering over a fork
+  } else {
+    document.body.style.cursor = "default";  // Default cursor
+  }
+});
+
 // </INTERACTION>
 
-/*  // </AUTO ROTATE>
+ // </AUTO ROTATE>
 let clock = new THREE.Clock();
 
 let globalUniforms = {
@@ -208,6 +261,16 @@ controls.enableDamping = true;
 controls.autoRotate = true;
 controls.autoRotateSpeed *= 0.25;
 
+const globeElement = renderer.domElement;
+
+globeElement.addEventListener("mouseenter", () => {
+  controls.autoRotate = false;
+});
+
+globeElement.addEventListener("mouseleave", () => {
+  controls.autoRotate = true;
+});
+
 renderer.setAnimationLoop(() => {
   let t = clock.getElapsedTime();
   globalUniforms.time.value = t;
@@ -215,7 +278,7 @@ renderer.setAnimationLoop(() => {
   renderer.render(scene, camera);
 });
 // </AUTO ROTATE>
- */
+
 
 function animate() {
   requestAnimationFrame(animate);
@@ -249,3 +312,123 @@ document.getElementById("print-btn").addEventListener("click", () => {
   window.location.reload();
 });
 // </PRINT>
+
+// Helper: Show tooltip
+function createTooltip(target, message, delay = 3000) {
+  const tooltip = document.createElement("div");
+  tooltip.className = "tooltip";
+  tooltip.innerHTML = `<p>${message}</p>`;
+  document.body.appendChild(tooltip);
+
+  const rect = target.getBoundingClientRect();
+
+  // Adjust position to show tooltip below the button
+  tooltip.style.left = `${rect.left + rect.width / 2 - tooltip.offsetWidth / 2}px`;
+  tooltip.style.top = `${rect.top + rect.height + 10}px`; // Position below the button
+
+  setTimeout(() => {
+    tooltip.remove();
+  }, delay);
+}
+
+
+// Welcome modal
+function showWelcomeModal() {
+  const modal = document.createElement("div");
+  modal.className = "welcome-modal";
+  modal.innerHTML = `
+    <div class="modal-content">
+      <h2>Welcome to the Recipe Globe</h2>
+      <p>Discover recipes from around the world! Click on a fork to explore a country's recipe.</p>
+      <button id="start-btn">Get Started</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  document.getElementById("start-btn").addEventListener("click", () => {
+    modal.remove();
+    showOnboarding();
+  });
+}
+
+// Onboarding tooltips
+function showOnboarding() {
+  const globeElement = renderer.domElement;
+  const printButton = document.getElementById("print-btn");
+
+  // Tooltip for the globe interaction
+  createTooltip(globeElement, "Rotate the globe and click on forks to explore recipes!");
+
+  // Delay the print button tooltip
+  if (printButton) {
+    setTimeout(() => {
+      createTooltip(printButton, "Use this button to print the recipe!", 5000);
+    }, 4000);
+  } else {
+    console.error("Print button not found in the DOM.");
+  }
+}
+
+// Check if first time
+if (!localStorage.getItem("visited")) {
+  localStorage.setItem("visited", "true");
+  showWelcomeModal();
+}
+
+// Additional CSS styles for tooltips and modal
+const styles = `
+  .tooltip {
+    position: absolute;
+    background: black;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    z-index: 1000;
+    text-align: center;
+  }
+
+  .welcome-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .welcome-modal .modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+  }
+
+  .welcome-modal h2 {
+    margin-top: 0;
+  }
+
+  .welcome-modal button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .welcome-modal button:hover {
+    background: #0056b3;
+  }
+`;
+
+// Inject styles into the document
+const styleSheet = document.createElement("style");
+styleSheet.type = "text/css";
+styleSheet.innerText = styles;
+document.head.appendChild(styleSheet);

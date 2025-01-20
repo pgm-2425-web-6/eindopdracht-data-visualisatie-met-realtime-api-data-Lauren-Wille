@@ -14,8 +14,8 @@ body {
 }
 
 .sidebar {
-  position: fixed;
-  right: 0px;
+  position: absolute;
+  right: -900px;
   top: 0px;
   width: 500px;
   height: 97%;
@@ -25,6 +25,12 @@ body {
   display: none;
   overflow: auto;
   z-index: 101;
+  transition: right 0.4s ease;
+
+  &.open 
+  {
+    right: 0;
+  }
 
   & .buttons {
     display: flex;

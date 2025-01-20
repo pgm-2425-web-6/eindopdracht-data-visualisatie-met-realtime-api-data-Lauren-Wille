@@ -190,7 +190,7 @@ async function onDocumentMouseDown(event) {
           }
         }
 
-        document.getElementById("details").innerHTML = `
+        const content = `
           <div class="content">
             <div class="sidebar_heading">
               <div class="heading_top">
@@ -214,6 +214,8 @@ async function onDocumentMouseDown(event) {
             </div>
           </div>
         `;
+        
+        openSidebar(content);
 
         const audioIcon = document.getElementById("audio-icon");
         if (audioIcon) {
@@ -236,6 +238,7 @@ async function onDocumentMouseDown(event) {
   }
 };
 
+
 const sidebarDriving = () => {
   const sidebarDriver = driver({
     steps: [
@@ -250,13 +253,22 @@ const sidebarDriving = () => {
 
 document.addEventListener("mousedown", onDocumentMouseDown);
 
+
+function openSidebar(content) {
+  sidebar.classList.add("open");
+  document.getElementById("details").innerHTML = content;
+}
+
+function closeSidebar() {
+  sidebar.classList.remove("open");
+  setTimeout(() => {
+    document.getElementById("details").innerHTML = ""; // Clear details after sliding out
+  }, 700); // Delay in milliseconds (match the CSS transition duration)
+}
+
+
 const closebutton = document.getElementById("close-btn");
-closebutton.addEventListener("click", () => {
-  if (sidebar.style.display === "block") {  // Use '===' for comparison
-    sidebar.style.display = "none";
-    document.getElementById("details").innerHTML = "";  // Clear details on close
-  }
-});
+closebutton.addEventListener("click", closeSidebar);
 
 
 document.addEventListener("mousemove", (event) => {

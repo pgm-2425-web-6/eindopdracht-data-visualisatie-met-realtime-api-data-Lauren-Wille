@@ -21,10 +21,21 @@
   </head>
   <body>
 
-    <div class="info">
-      <p id="info">
-      </p>
-    </div>
+    <header class="header">
+      <div>
+        <img class="logo" src="./images/logo.png" alt="logo">
+        <p>Recipe Globe</p>
+      </div>
+      <img class="infoImage" id="infoImage" src="./images/info.png" alt="Get Info">
+      <div class="info" id="info">
+        Welcome to the Recipe Globe.
+        <br>
+        Choose a fork and discover a meal from that country. 
+        <br>Learn the word 'hello' in their language. 
+        <br>Print the recipe for later.
+      </div>
+    </header>
+    
 
     <div id="threejs-container"></div>
 
@@ -40,7 +51,21 @@
         ]
       });
 
-    driverObj.drive();
+    //driverObj.drive();
+
+    const infoImage = document.getElementById("infoImage");
+    const info = document.querySelector(".info");
+
+    infoImage.addEventListener("mouseover", () => {
+      const rect = infoImage.getBoundingClientRect(); // Get the position of the icon
+      info.style.top = `${rect.bottom + window.scrollY}px`; // Set the top position
+      info.style.right = `20px`; // Set the left position
+      info.style.display = "block"; // Ensure the info is visible
+    });
+
+    infoImage.addEventListener("mouseout", () => {
+      info.style.display = "none"; // Hide the info when the mouse leaves the icon
+    });
 
     </script>
   </body>

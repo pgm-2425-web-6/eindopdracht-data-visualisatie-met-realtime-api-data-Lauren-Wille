@@ -5,7 +5,7 @@ import { OrbitControls } from "jsm/controls/OrbitControls.js";
 const w = window.innerWidth;
 const h = window.innerHeight;
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
 camera.position.z = 5;
 
 const renderer = new THREE.WebGLRenderer();
@@ -191,26 +191,28 @@ async function onDocumentMouseDown(event) {
         }
 
         document.getElementById("details").innerHTML = `
-        <div class="content">
-          <div class="heading">
-            <a class="audio-icon" id="audio-icon">
-              <img src="./images/audio.png" alt="Play Audio">
-            </a>
-            <img src="${flag}" alt="${country}" class="flagImage">
-            <h2>${name}</h2>
+          <div class="content">
+            <div class="sidebar_heading">
+              <div class="heading_top">
+                <img src="${flag}" alt="${country}" class="flagImage">
+                <h2>${name}</h2>
+              </div>
+              <a class="audio-icon" id="audio-icon">
+                Say hello: <img src="./images/audio.png" alt="Play Audio">
+              </a>
+            </div>
+            <div class="image-container">
+              <img src="${image}" alt="${name}" class="mealImage">
+            </div>
+            <div id="info-recipe">
+              <h4>Ingredients</h4>
+              <ul class="ingredients">
+                ${ingredients.join("")}
+              </ul>
+              <h4>Recipe</h4>
+              <p>${instructions}</p>
+            </div>
           </div>
-          <div class="image-container">
-            <img src="${image}" alt="${name}" class="mealImage">
-          </div>
-          <div id="info-recipe">
-            <h4>Ingredients</h4>
-            <ul class="ingredients">
-              ${ingredients.join("")}
-            </ul>
-            <h4>Recipe</h4>
-            ${instructions}
-          </div>
-        </div>
         `;
 
         const audioIcon = document.getElementById("audio-icon");
@@ -243,7 +245,7 @@ const sidebarDriving = () => {
     ]
   });
 
-  sidebarDriver.drive();
+  //sidebarDriver.drive();
 }
 
 document.addEventListener("mousedown", onDocumentMouseDown);
@@ -343,25 +345,26 @@ window.addEventListener("resize", handleWindowResize);
 
 // </PRINT>
 document.getElementById("print-btn").addEventListener("click", () => {
-  const originalContent = document.body.innerHTML;
+  const style = document.createElement('style');
+  style.type = 'text/css';
+  style.media = 'print';
 
-  document.body.innerHTML = sidebar.outerHTML;
+  style.innerHTML = `
+    @page {
+      size: landscape;
+    }
+  `;
 
-  sidebar.style.height = "auto";
-  sidebar.style.width = "auto";
-  sidebar.style.overflow = "visible";
+  document.head.appendChild(style);
 
   window.print();
 
-  document.body.innerHTML = originalContent;
-
-  window.location.reload();
+  document.head.removeChild(style);
 });
 // </PRINT>
 
 // <AUDIO>
 function audioFunction(country) {
-  // Dynamically construct the audio file path
   const audioPath = `./audio/${country}.mp3`;
 
   const audio = new Audio(audioPath);
@@ -376,125 +379,3 @@ function audioFunction(country) {
     });
 }
 // </AUDIO>
-
-// Helper: Show tooltip
-/* function createTooltip(target, message, delay = 3000) {
-  const tooltip = document.createElement("div");
-  tooltip.className = "tooltip";
-  tooltip.innerHTML = `<p>${message}</p>`;
-  document.body.appendChild(tooltip);
-
-  const rect = target.getBoundingClientRect();
-
-  // Adjust position to show tooltip below the button
-  tooltip.style.left = `${rect.left + rect.width / 2 - tooltip.offsetWidth / 2}px`;
-  tooltip.style.top = `${rect.top + rect.height + 10}px`; // Position below the button
-
-  setTimeout(() => {
-    tooltip.remove();
-  }, delay);
-}
-
-
-// Welcome modal
-function showWelcomeModal() {
-  const modal = document.createElement("div");
-  modal.className = "welcome-modal";
-  modal.innerHTML = `
-    <div class="modal-content">
-      <h2>Welcome to the Recipe Globe</h2>
-      <p>Discover recipes from around the world! Click on a fork to explore a country's recipe.</p>
-      <button id="start-btn">Get Started</button>
-    </div>
-  `;
-  document.body.appendChild(modal);
-
-  document.getElementById("start-btn").addEventListener("click", () => {
-    modal.remove();
-    showOnboarding();
-  });
-}
-
-// Onboarding tooltips
-function showOnboarding() {
-  const globeElement = renderer.domElement;
-  const printButton = document.getElementById("print-btn");
-
-  // Tooltip for the globe interaction
-  createTooltip(globeElement, "Rotate the globe and click on forks to explore recipes!");
-
-  // Delay the print button tooltip
-  if (printButton) {
-    setTimeout(() => {
-      createTooltip(printButton, "Use this button to print the recipe!", 5000);
-    }, 4000);
-  } else {
-    console.error("Print button not found in the DOM.");
-  }
-}
-
-// Check if first time
-if (!localStorage.getItem("visited")) {
-  localStorage.setItem("visited", "true");
-  showWelcomeModal();
-}
-
-// Additional CSS styles for tooltips and modal
-const styles = `
-  .tooltip {
-    position: absolute;
-    background: black;
-    color: white;
-    padding: 10px;
-    border-radius: 5px;
-    font-size: 14px;
-    z-index: 1000;
-    text-align: center;
-  }
-
-  .welcome-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-
-  .welcome-modal .modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-  }
-
-  .welcome-modal h2 {
-    margin-top: 0;
-  }
-
-  .welcome-modal button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-
-  .welcome-modal button:hover {
-    background: #0056b3;
-  }
-`;
-
-// Inject styles into the document
-const styleSheet = document.createElement("style");
-styleSheet.type = "text/css";
-styleSheet.innerText = styles;
-document.head.appendChild(styleSheet);
- */
-

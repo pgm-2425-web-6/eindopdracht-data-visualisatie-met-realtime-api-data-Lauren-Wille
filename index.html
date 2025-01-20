@@ -13,21 +13,35 @@
         }
       }
       </script>
+
+      <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
       
     <link rel="stylesheet" href="style/main.css">
   </head>
   <body>
 
     <div class="info">
-      <p>
-        Welcome to the Recipe Globe! Click on forks to explore recipes from around the world! 
-        <br><br>Want to keep a recipe? Use the print button!
-        <br><br>Learn the how to say 'Hello' in the language of the country? Click the audio button next to the flag.
+      <p id="info">
       </p>
     </div>
 
     <div id="threejs-container"></div>
 
     <script type="module" src="index.js"></script>
+
+    <script>
+      const driver = window.driver.js.driver;
+
+      const driverObj = driver({
+        steps: [
+          { popover: { title: 'Welcome to the recipe globe!', description: 'Get a taste of the world.', side: "top", align: 'start' }},
+          {element: '#marker-1', popover: {title: 'Choose a marker', description: 'Click a fork to choose a country and see its recipe', side: "bottom", align: 'start'}}
+        ]
+      });
+
+    driverObj.drive();
+
+    </script>
   </body>
 </html>

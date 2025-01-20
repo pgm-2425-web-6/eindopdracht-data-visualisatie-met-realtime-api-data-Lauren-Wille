@@ -212,3 +212,8 @@ body {
     cursor: pointer;
    }
 }
+
+.driver-popover-prev-btn
+{
+  display: none !important;
+}

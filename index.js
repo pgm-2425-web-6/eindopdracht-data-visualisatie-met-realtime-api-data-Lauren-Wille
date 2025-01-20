@@ -35,6 +35,8 @@ import { GLTFLoader } from 'GLTFLoader';
 const glftLoader = new GLTFLoader();
 const markersMap = new Map();
 
+let markerId = 0;
+
 fetch("./data/areas.json")
   .then((response) => {
     if (!response.ok) {
@@ -84,14 +86,27 @@ fetch("./data/areas.json")
         marker.quaternion.copy(quaternion);
     
         marker.country = area.strArea;
+
+        marker.markerid = `marker-${markerId++}`;
     
         scene.add(marker);
     
         markersMap.set(marker, area.strArea);
+
+         const markerElement = document.createElement("div");
+          markerElement.id = marker.markerid; // Assign the same ID as the marker
+          markerElement.className = "marker-dom";
+          markerElement.style.position = "absolute";
+
+          document.body.appendChild(markerElement);
+
+          // Position the DOM element over the marker
+          const canvasBounds = renderer.domElement.getBoundingClientRect();
+          const screenPosition = marker.position.clone().project(camera);
+          markerElement.style.left = `${(screenPosition.x * 0.5 + 0.5) * canvasBounds.width}px`;
+          markerElement.style.top = `${(-screenPosition.y * 0.5 + 0.5) * canvasBounds.height}px`;
       });
     });
-    
-    
   })
   .catch((error) => console.error("Error loading JSON:", error));
 // </MARKERS>
@@ -100,11 +115,14 @@ fetch("./data/areas.json")
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
+
 const sidebar = document.createElement("div");
 sidebar.className = "sidebar";
 sidebar.innerHTML =
   "<div class='buttons'> <button class='print-btn' id='print-btn'><img src='images/print.svg' alt='print'></button><button class='close-btn' id='close-btn'>X</button></div> <div class='details' id='details'></div>";
 document.body.appendChild(sidebar);
+
+let isFirstTimeSidebarOpened = true;
 
 async function onDocumentMouseDown(event) {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -136,6 +154,7 @@ async function onDocumentMouseDown(event) {
         }
 
         const areaData = await areaResponse.json();
+
         if (!areaData.meals || areaData.meals.length === 0) {
           throw new Error(
             `No meals found for country: ${clickedObject.country}`
@@ -153,6 +172,7 @@ async function onDocumentMouseDown(event) {
         }
 
         const mealData = await mealResponse.json();
+
         const recipe = mealData.meals[0];
 
         const image = recipe.strMealThumb;
@@ -170,31 +190,38 @@ async function onDocumentMouseDown(event) {
           }
         }
 
-
         document.getElementById("details").innerHTML = `
         <div class="content">
           <div class="heading">
-           <a class="audio-icon" id="audio-icon">
+            <a class="audio-icon" id="audio-icon">
               <img src="./images/audio.png" alt="Play Audio">
-          </a>
+            </a>
             <img src="${flag}" alt="${country}" class="flagImage">
             <h2>${name}</h2>
           </div>
           <div class="image-container">
             <img src="${image}" alt="${name}" class="mealImage">
           </div>
-          <h4>Ingredients</h4>
-          <ul class="ingredients">
-          ${ingredients.join("")}
-          </ul>
-          <h4>Recipe</h4>
-          ${instructions}
+          <div id="info-recipe">
+            <h4>Ingredients</h4>
+            <ul class="ingredients">
+              ${ingredients.join("")}
+            </ul>
+            <h4>Recipe</h4>
+            ${instructions}
+          </div>
         </div>
         `;
 
         const audioIcon = document.getElementById("audio-icon");
         if (audioIcon) {
           audioIcon.addEventListener("click", () => audioFunction(country));
+        }
+
+        // Start the sidebar tour only once
+        if (isFirstTimeSidebarOpened) {
+          sidebarDriving();
+          isFirstTimeSidebarOpened = false;  
         }
 
       } catch (error) {
@@ -207,16 +234,28 @@ async function onDocumentMouseDown(event) {
   }
 };
 
+const sidebarDriving = () => {
+  const sidebarDriver = driver({
+    steps: [
+      {element: '#info-recipe', popover: {title: 'Start cooking', description: 'Here are the ingredients and recipe.', side: "bottom", align: 'start'}},
+      {element: '#print-btn', popover: {title: 'Print it', description: 'Save the recipe for later and print it.', side: "bottom", align: 'start'}},
+      {element: '#audio-icon', popover: {title: 'Learn the language', description: 'Click this button to learn how to say "hello" in this country!', side: "bottom", align: 'start'}},
+    ]
+  });
+
+  sidebarDriver.drive();
+}
+
 document.addEventListener("mousedown", onDocumentMouseDown);
 
 const closebutton = document.getElementById("close-btn");
 closebutton.addEventListener("click", () => {
-  if ((sidebar.style.display = "block")) {
+  if (sidebar.style.display === "block") {  // Use '===' for comparison
     sidebar.style.display = "none";
-
-    document.getElementById("details").innerHTML = "";
+    document.getElementById("details").innerHTML = "";  // Clear details on close
   }
 });
+
 
 document.addEventListener("mousemove", (event) => {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;

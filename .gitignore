@@ -4,8 +4,6 @@ package-lock.json
 
 .env
 
-knex-demo.sqlite3
-
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/

@@ -320,8 +320,26 @@ document.getElementById("print-btn").addEventListener("click", () => {
 });
 // </PRINT>
 
+// <AUDIO>
+function audioFunction(country) {
+  // Dynamically construct the audio file path
+  const audioPath = `./audio/${country}.mp3`;
+
+  const audio = new Audio(audioPath);
+
+  audio
+    .play()
+    .then(() => {
+      console.log(`Playing audio for ${country}`);
+    })
+    .catch((error) => {
+      console.error(`Failed to play audio for ${country}:`, error);
+    });
+}
+// </AUDIO>
+
 // Helper: Show tooltip
-function createTooltip(target, message, delay = 3000) {
+/* function createTooltip(target, message, delay = 3000) {
   const tooltip = document.createElement("div");
   tooltip.className = "tooltip";
   tooltip.innerHTML = `<p>${message}</p>`;
@@ -439,19 +457,5 @@ const styleSheet = document.createElement("style");
 styleSheet.type = "text/css";
 styleSheet.innerText = styles;
 document.head.appendChild(styleSheet);
+ */
 
-function audioFunction(country) {
-  // Dynamically construct the audio file path
-  const audioPath = `./audio/${country}.mp3`;
-
-  const audio = new Audio(audioPath);
-
-  audio
-    .play()
-    .then(() => {
-      console.log(`Playing audio for ${country}`);
-    })
-    .catch((error) => {
-      console.error(`Failed to play audio for ${country}:`, error);
-    });
-}

@@ -222,8 +222,7 @@ async function onDocumentMouseDown(event) {
           audioIcon.addEventListener("click", () => audioFunction(country));
         }
 
-        // Start the sidebar tour only once
-        if (isFirstTimeSidebarOpened) {
+       if (isFirstTimeSidebarOpened) {
           sidebarDriving();
           isFirstTimeSidebarOpened = false;  
         }

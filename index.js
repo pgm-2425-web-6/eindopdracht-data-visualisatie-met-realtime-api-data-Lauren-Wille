@@ -248,7 +248,7 @@ const sidebarDriving = () => {
     ]
   });
 
-  //sidebarDriver.drive();
+  sidebarDriver.drive();
 }
 
 document.addEventListener("mousedown", onDocumentMouseDown);

@@ -192,7 +192,7 @@ header
   border-radius: 5px;
   padding: 10px;
   z-index: 100; 
-  text-align: center;
+  text-align: left;
   width: max-content;
 }
 

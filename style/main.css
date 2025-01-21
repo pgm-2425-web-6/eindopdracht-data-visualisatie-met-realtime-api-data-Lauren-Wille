@@ -229,11 +229,6 @@ header
 }
 
 @media print and (min-width: 768px){
-  body
-  {
-    overflow: hidden;
-    width: 100vw;
-  }
 
   .sidebar {
     display: block;

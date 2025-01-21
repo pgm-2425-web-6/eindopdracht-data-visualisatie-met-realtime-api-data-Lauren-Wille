@@ -30,6 +30,7 @@ body {
   &.open 
   {
     right: 0;
+    display:initial; 
   }
 
   & .buttons {
@@ -228,6 +229,12 @@ header
 }
 
 @media print and (min-width: 768px){
+  body
+  {
+    overflow: hidden;
+    width: 100vw;
+  }
+
   .sidebar {
     display: block;
     height: auto;

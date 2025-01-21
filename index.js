@@ -261,8 +261,8 @@ function openSidebar(content) {
 function closeSidebar() {
   sidebar.classList.remove("open");
   setTimeout(() => {
-    document.getElementById("details").innerHTML = ""; // Clear details after sliding out
-  }, 700); // Delay in milliseconds (match the CSS transition duration)
+    document.getElementById("details").innerHTML = ""; 
+  }, 700); 
 }
 
 
@@ -305,7 +305,7 @@ document.addEventListener("mousemove", (event) => {
 
 // </INTERACTION>
 
- // </AUTO ROTATE>
+  // </AUTO ROTATE>
 let clock = new THREE.Clock();
 
 let globalUniforms = {
